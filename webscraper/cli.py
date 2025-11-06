@@ -17,6 +17,7 @@ def main(argv: Optional[list] = None) -> int:
         parser.add_argument("--selector", help="CSS selector (for HTML) or XPath (for XML)")
         parser.add_argument("--attribute", help="Attribute to extract for HTML selectors (e.g., href)")
         parser.add_argument("--extract-links", action="store_true", help="Extract links (HTML only)")
+        parser.add_argument("--output", "-o", help="Path to save output as JSON (if omitted, prints to stdout)")
 
     url_cmd = sub.add_parser("from-url", help="Fetch content from URL")
     url_cmd.add_argument("--url", required=True, help="URL to fetch")
@@ -54,7 +55,16 @@ def main(argv: Optional[list] = None) -> int:
                 return 3
             out = scraper.extract_by_xpath(content, args.selector)
 
-        print(json.dumps(out, ensure_ascii=False, indent=2))
+        # If the user supplied an output path, save to file; otherwise print JSON to stdout
+        if getattr(args, "output", None):
+            try:
+                scraper.save_json_to_file(out, args.output)
+                print(f"Saved output to {args.output}")
+            except Exception as e:
+                print(f"Failed to save output: {e}", file=sys.stderr)
+                return 1
+        else:
+            print(json.dumps(out, ensure_ascii=False, indent=2))
         return 0
 
     except Exception as e:

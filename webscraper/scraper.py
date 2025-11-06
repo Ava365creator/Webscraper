@@ -103,3 +103,12 @@ def parse_xml_file(path: str) -> str:
 
 def to_json(data: Any) -> str:
     return json.dumps(data, indent=2, ensure_ascii=False)
+
+
+def save_json_to_file(data: Any, path: str) -> None:
+    """Save Python data (list/dict/str) as JSON to the given file path."""
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except OSError as e:
+        raise ScraperError(f"Failed to write output to {path}: {e}")
